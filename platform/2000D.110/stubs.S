@@ -240,7 +240,7 @@ NSTUB(0xfe127918,  GetMemoryInformation)                    // called from Alloc
 NSTUB(0xfe1278c4,  GetSizeOfMaxRegion)
 NSTUB(0xfe127b78, _AllocateMemory)                          // "[MEM] NG AllocateMemory"
 NSTUB(0xfe127f14, _FreeMemory)
-NSTUB(0xfe11f3c8, _alloc_dma_memory)
+NSTUB(0xfe2c184c, _alloc_dma_memory)
 NSTUB(0xfe2c5f28, _free)
 NSTUB(0xfe2c1888, _free_dma_memory)
 NSTUB(0xfe2c5ed0, _malloc)                                  // maybe its better to use Allocate/Free?
@@ -271,8 +271,8 @@ NSTUB(0xfe10c4c0,  prop_register_slave)                     // called by"GUI_Reg
 // NSTUB(0xFE2B95BC,  RequestRPC)                           /* present on 7D.203, 7D_MASTER.203 */
 
 /** Recursive locks **/
-NSTUB(    0xbcb8,  AcquireRecursiveLock)
-NSTUB(    0xbbf8,  CreateRecursiveLock) 
+NSTUB(    0xbcb8,  AcquireRecursiveLock) 
+NSTUB(    0xbbf8,  CreateRecursiveLock)  //ReceiptRecursiveLock
 NSTUB(    0xbe28,  ReleaseRecursiveLock)
 
 /** ResLock **/
@@ -291,6 +291,8 @@ NSTUB(   0x358ec,  task_max)
 //ok
 NSTUB(0x4080,  get_task_by_id)                         // AJ_task_trampoline_related_p10 FE2C2ED0 
 
+
+// ??
 NSTUB(0x24c4,  _get_task_info_by_id)                         // AJ_task_trampoline_related_p10 FE2C2ED0 
 //THUMB_FN(0xfcb46b2c,  _get_task_info_by_id) 
 //NSTUB(0xfEa95880,  is_taskid_valid)                         // AJ_task_trampoline_related_p10 FE2C2ED0
@@ -305,9 +307,11 @@ NSTUB(     0x640,  current_interrupt)                       // in interrupt hand
 
 /** Task sleep **/
 NSTUB(    0x3780,  msleep)                                  // called from EV_GETDONE_CACHE param 0x64
+ 
+/* from task_trampoline -> last sub -> if (arg0 == CURRENT_TASK) call_new_task_dispatch_hook() */
 
 /** Tasks **/
-NSTUB(   0x35924,  task_dispatch_hook)  // task_trampoline -> last call -> last non-empty BL -> one indirect call here
+NSTUB(   0x35928,  task_dispatch_hook)  // task_trampoline -> last call -> last non-empty BL -> one indirect call here
 NSTUB(    0x38FC,  task_create)
 NSTUB(    0x41DC,  task_trampoline)
 // NSTUB(    ???,  current_task_ctx)                        /* present on 7D.203 */

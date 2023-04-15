@@ -87,6 +87,18 @@ typedef struct {
 jump_vector *jump_vectors;
 #endif
 
+#ifdef CONFIG_2000D
+// see patch_instruction_jump
+uint32_t *patch_jump_vector;
+const uint32_t patch_jump_size = 64*3;
+typedef struct {
+    uint32_t ins_trampoline;// trampoline instruction = LDR PC, [PC,#-4]
+    uint32_t new_func_addr; // trampoline address
+    uint32_t rom_func_addr; // for later identification
+} jump_vector;
+jump_vector *jump_vectors;
+#endif
+
 /* at startup we don't have malloc, so we allocate it statically */
 static union logging_hook_code logging_hooks[MAX_LOGGING_HOOKS];
 
@@ -554,6 +566,28 @@ int unpatch_memory(uintptr_t _addr)
 			break;
 		}
 #endif
+
+#ifdef CONFIG_2000D
+		else
+		{
+			int logging_slot = -1;
+			for (int ii = 0; ii < COUNT(logging_hooks); ii++)
+			{
+				if (logging_hooks[ii].addr != 0)
+				{
+					union logging_hook_code * hook = &logging_hooks[ii];
+					if (patches[i].addr == &hook->jump_back)
+					{
+							unpatch_memory(patches[i].addr);
+							break;
+					}
+				}
+			}
+			p = i;
+			break;
+		}
+#endif
+
     }
 
     if (p < 0)
@@ -595,6 +629,19 @@ int unpatch_memory(uintptr_t _addr)
         }
     }
 #ifdef CONFIG_1300D
+   // check is this patch was an double jump 
+   for (uint32_t i=0;i<patch_jump_size/sizeof(jump_vector);i++) 
+   {
+     if (jump_vectors[i].rom_func_addr == addr)
+     {
+       jump_vectors[i].ins_trampoline = 0x0;
+       jump_vectors[i].new_func_addr = 0x0;
+       jump_vectors[i].rom_func_addr = 0x0;
+     }
+   }
+#endif
+
+#ifdef CONFIG_2000D
    // check is this patch was an double jump 
    for (uint32_t i=0;i<patch_jump_size/sizeof(jump_vector);i++) 
    {
@@ -1003,7 +1050,7 @@ int patch_hook_function(uintptr_t addr, uint32_t orig_instr, patch_hook_function
     }
     
     union logging_hook_code * hook = &logging_hooks[logging_slot];
-#ifndef CONFIG_1300D
+#if !defined(CONFIG_1300D) || !defined(CONFIG_2000D)
     /* check the jumps we are going to use */
     /* fixme: use long jumps? */
     if (!check_jump_range((uint32_t) &hook->reloc_insn, (uint32_t) addr + 4) ||
@@ -1043,7 +1090,7 @@ int patch_hook_function(uintptr_t addr, uint32_t orig_instr, patch_hook_function
     sync_caches();
 
 
-#ifdef CONFIG_1300D
+#if defined(CONFIG_1300D) || defined(CONFIG_2000D)
     /* Make the hooking code "jump_back" to use double jumping  */
     err = patch_instruction_jump(&hook->jump_back,addr+4, 1, description);
     if (err)
@@ -1075,7 +1122,7 @@ end:
     return err;
 }
 
-#ifdef CONFIG_1300D
+#if defined(CONFIG_1300D) || defined(CONFIG_2000D)
 
 #define JUMP_BL 0
 #define JUMP_B  1
@@ -1494,7 +1541,7 @@ static void patch_simple_init()
     menu_add("Debug", patch_menu, COUNT(patch_menu));
 
 
-#ifdef CONFIG_1300D
+#if defined(CONFIG_1300D) || defined(CONFIG_2000D)
     // memset jump_vector
     memset(patch_jump_vector,0,patch_jump_size);
 

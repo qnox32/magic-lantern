@@ -164,8 +164,16 @@ int patch_instruction_jump(
     uint32_t jump_type,
     const char * description
 );
+#endif
 
-
+#ifdef CONFIG_2000D
+/* use this patch on 1300D for hijacking function calls, to escape the 32MB relative jump limitations */
+int patch_instruction_jump(
+    uintptr_t rom_func_addr,
+    uintptr_t new_func_addr,
+    uint32_t jump_type,
+    const char * description
+);
 #endif
 
 int patch_hook_function(uintptr_t addr, uint32_t orig_instr, patch_hook_function_cbr logging_function, const char * description);

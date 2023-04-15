@@ -124,6 +124,16 @@ static int my_init_task(int a, int b, int c, int d)
     qprintf("[BOOT] 1300D allocating jump vector size = %d at = %lx\n", patch_jump_size, patch_jump_vector);
 #endif
 
+#ifdef CONFIG_2000D
+// set patch.c (patch_instruction_jump) for more information
+// allocate <patch_jump_size> bytes with the lowest address, try static, malloc or gcc_alloca or other.
+    extern uint32_t  patch_jump_size;
+    extern uint32_t *patch_jump_vector;
+    extern void * _malloc( size_t len );
+    patch_jump_vector = (uint32_t*)_malloc(patch_jump_size); 
+    qprintf("[BOOT] 1300D allocating jump vector size = %d at = %lx\n", patch_jump_size, patch_jump_vector);
+#endif
+
     return ans;
 }
 

@@ -79,6 +79,7 @@
 #define PROP_LV_FOCUS           0x80050001 // only works in liveview mode; LVCAF_LensDriveStart
 #define PROP_LV_FOCUS_DONE      0x80050002 // output when focus motor is done?
 #define PROP_LV_FOCUS_STOP      0x80050003 // LVCAF_LensDriveStop
+#define PROP_LV_FOCUS_BAD       0x80050029 // true if camera couldn't focus?
 #define PROP_LV_AF_RESULT       0x80050029 // 0 = OK, 1 = couldn't focus; triggered at the end of AF operation
 #define PROP_LV_FOCUS_STATE     0x80050009 // 1 OK, 101 bad, 201 not done?
 #define PROP_LV_FOCUS_STATUS    0x80050023 // 1 = idle, 3 = focusing in LiveView
@@ -503,6 +504,9 @@
 #define PROP_SHUTTER_AF_DURING_RECORD   0x8000003C // PROP_MOVIE_REC_AF
 
 #define PROP_REGISTRATION_DATA_UPDATE_FUNC 0x80000044 // custom slave cBr?
+#define PROP_CONTINUOUS_AF_MODE 0x80000042
+#define PROP_CONTINUOUS_AF_VALID 0x80000043 //also toggles servo
+#define PROP_MOVIE_REC_AF 0x8000003C
 
 // #define PROP_AF_CURRENT_AISERVO_STYLE 0x8004004B
 

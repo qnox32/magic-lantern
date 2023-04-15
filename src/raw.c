@@ -150,6 +150,12 @@ static int (*dual_iso_get_dr_improvement)() = MODULE_FUNCTION(dual_iso_get_dr_im
 #define DEFAULT_RAW_BUFFER MEM(MEM(0x37930 + 0x30))     /*0xfe1a3d6c how much do we have allocated? */
 #define DEFAULT_RAW_BUFFER_SIZE 8*1024*1024     /* is this really overwritten by other code? needs some investigation */
 #endif
+
+#ifdef CONFIG_2000D
+#define DEFAULT_RAW_BUFFER MEM(MEM(0x37930 + 0x30))     /*0xfe1a3d6c how much do we have allocated? */
+#define DEFAULT_RAW_BUFFER_SIZE 8*1024*1024     /* is this really overwritten by other code? needs some investigation */
+#endif
+
 #ifdef CONFIG_1100D
 #define DEFAULT_RAW_BUFFER MEM(MEM(0x4C64))     /* how much do we have allocated? */
 #define DEFAULT_RAW_BUFFER_SIZE 8*1024*1024     /* is this really overwritten by other code? needs some investigation */
@@ -213,7 +219,7 @@ static int (*dual_iso_get_dr_improvement)() = MODULE_FUNCTION(dual_iso_get_dr_im
  * and http://a1ex.bitbucket.org/ML/states/ for state diagrams.
  */
 
-#if defined(CONFIG_5D2) || defined(CONFIG_50D) || defined(CONFIG_60D) || defined(CONFIG_550D) || defined(CONFIG_500D) || defined(CONFIG_600D) || defined(CONFIG_1100D) || defined(CONFIG_1200D) || defined(CONFIG_7D) || defined(CONFIG_1300D)
+#if defined(CONFIG_5D2) || defined(CONFIG_50D) || defined(CONFIG_60D) || defined(CONFIG_550D) || defined(CONFIG_500D) || defined(CONFIG_600D) || defined(CONFIG_1100D) || defined(CONFIG_1200D) || defined(CONFIG_7D) || defined(CONFIG_1300D) || defined(CONFIG_2000D)
 #define RAW_PHOTO_EDMAC 0xc0f04208
 #endif
 
@@ -453,6 +459,16 @@ if (!is_EOSM && !is_100D && !is_6D && !is_5D3)
      -819, 10000,     1944, 10000,    5931, 10000
 #endif
 
+#ifdef CONFIG_2000D
+	// PLACEHOLDER DATA FROM 600D TO BUILD HELLOWORLD
+        //~ { "Canon EOS 1300D", 0, 0x3510,
+        //~ { 6461,-907,-882,-4300,12184,2378,-819,1944,5931 } },
+    #define CAM_COLORMATRIX1                       \
+      6461, 10000,     -907, 10000,    -882, 10000,\
+    -4300, 10000,    12184, 10000,    2378, 10000, \
+     -819, 10000,     1944, 10000,    5931, 10000
+#endif
+
 struct raw_info GUARDED_BY(raw_sem) raw_info = {
     .api_version = 1,
     .bits_per_pixel = 14,
@@ -530,7 +546,9 @@ static int dynamic_ranges[] = {1099, 1098, 1082, 1025, 965, 877, 784}; // No ISO
 static int dynamic_ranges[] = {1112, 1080, 1038, 984, 917, 834, 733, 655};
 #endif
 
-
+#ifdef CONFIG_2000D
+static int dynamic_ranges[] = {1095, 1104, 1075, 1027, 953, 874, 785};
+#endif
 
 #ifdef CONFIG_650D
 static int dynamic_ranges[] = {1062, 1047, 1021, 963,  888, 804, 695, 623, 548};
@@ -962,6 +980,13 @@ int raw_update_params_work()
         skip_bottom = zoom ? 4 : 0;
         #endif
 
+        #ifdef CONFIG_2000D
+        skip_top    = 28;
+        skip_left   = zoom ? 0 : 154;
+        skip_right  = zoom ? 0 : 4;
+        skip_bottom = zoom ? 4 : 0;
+        #endif
+
         dbg_printf("LV raw buffer: %x (%dx%d)\n", raw_info.buffer, width, height);
         dbg_printf("Skip left:%d right:%d top:%d bottom:%d\n", skip_left, skip_right, skip_top, skip_bottom);
 #else
@@ -1028,7 +1053,7 @@ int raw_update_params_work()
         height--;
         #endif
 
-        #if defined(CONFIG_550D) || defined(CONFIG_60D) || defined(CONFIG_600D) || defined(CONFIG_1200D) || defined(CONFIG_1300D)
+        #if defined(CONFIG_550D) || defined(CONFIG_60D) || defined(CONFIG_600D) || defined(CONFIG_1200D) || defined(CONFIG_1300D) || defined(CONFIG_2000D)
         skip_left = 142;
         skip_top = 52;
         #endif
@@ -2491,6 +2516,27 @@ void raw_lv_request_digital_gain(int gain)
 }
 
 #endif
+
+/* may not be correct on 4:3 screens */
+void raw_force_aspect_ratio_1to1()
+{
+    if (lv2raw.sy < lv2raw.sx) /* image too tall */
+    {
+        lv2raw.sy = lv2raw.sx;
+        int height = RAW2LV_DY(preview_rect_h);
+        int offset = (BM2LV_DY(os.y_ex) - height) / 2;
+        int skip_top = preview_rect_y;
+        lv2raw.ty = skip_top - LV2RAW_DY(os.y0) - LV2RAW_DY(offset);
+    }
+    else if (lv2raw.sx < lv2raw.sy) /* image too wide */
+    {
+        lv2raw.sx = lv2raw.sy;
+        int width = RAW2LV_DX(preview_rect_w);
+        int offset = (vram_lv.width - width) / 2;
+        int skip_left = preview_rect_x;
+        lv2raw.tx = skip_left - LV2RAW_DX(os.x0) - LV2RAW_DX(offset);
+    }
+}
 
 /* may not be correct on 4:3 screens */
 /* ratios are optional - if zero, they are taken from raw_capture_info */

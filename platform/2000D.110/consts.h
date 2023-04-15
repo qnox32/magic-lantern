@@ -59,21 +59,18 @@
 #define YUV422_HD_BUFFER_DMA_ADDR (shamem_read(REG_EDMAC_WRITE_HD_ADDR))
 
 // changes during record
- #define YUV422_HD_BUFFER_1 0x44000080
- #define YUV422_HD_BUFFER_2 0x46000080
- #define YUV422_HD_BUFFER_3 0x48000080
- #define YUV422_HD_BUFFER_4 0x4e000080
- #define YUV422_HD_BUFFER_5 0x50000080
+#define YUV422_HD_BUFFER_1 0x44000080
+#define YUV422_HD_BUFFER_2 0x46000080
+#define YUV422_HD_BUFFER_3 0x48000080
+#define YUV422_HD_BUFFER_4 0x4e000080
+#define YUV422_HD_BUFFER_5 0x50000080
 #define FOCUS_CONFIRMATION (*(int*)(0x36e20 + 0x4)) // ok see "focusinfo" and Wiki:Struct_Guessing
 #define HALFSHUTTER_PRESSED (*(int*)(0x359A4 + 0x1C)) //ok look for string "[MC] permit LV instant"
 #define DISPLAY_SENSOR_POWERED (*(int*)(0x359A0 + 0x18))  //ok Look up *"ForceDisableDisplay (%d)"
 
 // for gui_main_task
 #define GMT_NFUNCS 7
-//de verificat
-#define GMT_FUNCTABLE 0xFE851F20 // dec gui_main_task
-
-
+#define GMT_FUNCTABLE 0xfe848cb8 //correct, dec gui_main_task
 
 
 #define LV_BOTTOM_BAR_DISPLAYED (((*(int8_t*)0x3830C) == 0xF) || ((*(int8_t*)0x3FE14) != 0x17))
@@ -82,15 +79,12 @@
 #define SHOOTING_MODE (*(int*)0x35930)
 #define UNAVI_FEEDBACK_TIMER_ACTIVE (MEM(0x3fc74) != 0x17) //ok dec CancelUnaviFeedBackTimer
 
+#define AE_STATE (*(int8_t*)(0x3AA80 + 0x1C))
+#define AE_VALUE (*(int8_t*)(0x3AA80 + 0x1D))
+
+//#define CURRENT_GUI_MODE (*(int*)0x36560) // ok GUIMode_maybe 0x36478 + 0x48
  
-
-
-
- 
- #define AE_STATE (*(int8_t*)(0x3AA80 + 0x1C))
- #define AE_VALUE (*(int8_t*)(0x3AA80 + 0x1D))
-
-#define CURRENT_GUI_MODE (*(int*)0x36560) // ok GUIMode_maybe 0x36478 + 0x48
+#define CURRENT_GUI_MODE (*(int*)0x364c4) //correct 
     	// from a screenshot
 #define COLOR_FG_NONLV 80
 //#define COLOR_FG_NONLV 1
@@ -104,15 +98,12 @@
 #define GUIMODE_Q_UNAVI 0x1F
 #define GUIMODE_FLASH_AE 0x22
 #define GUIMODE_PICQ 6
- #define GUIMODE_MOVIE_ENSURE_A_LENS_IS_ATTACHED (CURRENT_GUI_MODE == 0x1e)
- #define GUIMODE_MOVIE_PRESS_LV_TO_RESUME (CURRENT_GUI_MODE == 0x1f)
+#define GUIMODE_MOVIE_ENSURE_A_LENS_IS_ATTACHED (CURRENT_GUI_MODE == 0x1e)
+#define GUIMODE_MOVIE_PRESS_LV_TO_RESUME (CURRENT_GUI_MODE == 0x1f)
 //~ #define GUIMODE_MOVIE_ENSURE_A_LENS_IS_ATTACHED 0 // not good
 //~ #define GUIMODE_MOVIE_PRESS_LV_TO_RESUME 0
-
- #define PLAY_MODE (gui_state == GUISTATE_PLAYMENU && CURRENT_GUI_MODE == GUIMODE_PLAY)
- #define MENU_MODE (gui_state == GUISTATE_PLAYMENU && CURRENT_GUI_MODE == GUIMODE_MENU)
-
-
+#define PLAY_MODE (gui_state == GUISTATE_PLAYMENU && CURRENT_GUI_MODE == GUIMODE_PLAY)
+#define MENU_MODE (gui_state == GUISTATE_PLAYMENU && CURRENT_GUI_MODE == GUIMODE_MENU)
 
 // position for ML ISO disp outside LV
 #define MENU_DISP_ISO_POS_X 527
@@ -174,12 +165,11 @@
 
 // In bindGUIEventFromGUICBR, look for "LV Set" => arg0 = 8 -> 1300D are val 6
 // Next, in SetGUIRequestMode, look at what code calls NotifyGUIEvent(8, something)
-//#define GUIMODE_ML_MENU (RECORDING ? 0 : lv ? 68 : 2)
+#define GUIMODE_ML_MENU (RECORDING ? 0 : lv ? 68 : 2)
 // skip RECORDING variant for now
-#define GUIMODE_ML_MENU (lv ? 68 : 2)
+//#define GUIMODE_ML_MENU (lv ? 68 : 2)
 
 #define NUM_PICSTYLES 10
-
 
 #define FLASH_MAX_EV 3
 #define FLASH_MIN_EV -5
@@ -194,9 +184,9 @@
 #define BULB_MIN_EXPOSURE 1000
 
 // http://magiclantern.wikia.com/wiki/Fonts
-#define BFNT_CHAR_CODES    0xff23eac8
-#define BFNT_BITMAP_OFFSET 0xff241a08
-#define BFNT_BITMAP_DATA   0xff244944
+#define BFNT_CHAR_CODES    0xf923eacc
+#define BFNT_BITMAP_OFFSET 0xf9241a08
+#define BFNT_BITMAP_DATA   0xf9244944
 // from CFn
 #define AF_BTN_HALFSHUTTER 0
 #define AF_BTN_STAR 1
@@ -215,7 +205,7 @@
 #define WINSYS_BMP_DIRTY_BIT_NEG MEM(0x3da10+0x2C) // see http://magiclantern.wikia.com/wiki/VRAM/BMP
 
 // manual exposure overrides
-#define LVAE_STRUCT 0x3B7A4  //ok
+#define LVAE_STRUCT 0x3B7A4  //
 #define CONTROL_BV      (*(uint16_t*)(LVAE_STRUCT+0x1c)) // ok EP_SetControlBv old 1c
 #define CONTROL_BV_TV   (*(uint16_t*)(LVAE_STRUCT+0x1e)) // EP_SetControlParam
 #define CONTROL_BV_AV   (*(uint16_t*)(LVAE_STRUCT+0x20))
@@ -256,7 +246,6 @@
 #define MALLOC_FREE_MEMORY (MEM(MALLOC_STRUCT + 8) - MEM(MALLOC_STRUCT + 0x1C)) // "Total Size" - "Allocated Size"
 #define SRM_BUFFER_SIZE 0x1f68000 //0x14E8000   /* print it from srm_malloc_cbr */
 
-
 // for bulb ramping calibration: delay between two exposure readings (increase it if brightness updates slowly)
 // if not defined, default is 500
 #define BRAMP_CALIBRATION_DELAY 1000
@@ -269,5 +258,3 @@
 // temperature convertion from raw-temperature to celsius
 // http://www.magiclantern.fm/forum/index.php?topic=9673.0
 #define EFIC_CELSIUS ((int)efic_temp * 55 / 100 - 68)
-
-

@@ -105,7 +105,6 @@ ML_INSTALLER_OBJS = \
 	$(ML_ENTRY_OBJ) \
 	$(ML_BOOT_OBJ) \
 	$(PLATFORM_DIR)/stubs.o \
-	installer.o \
 	version.o \
 	fio-ml.o \
 	ico.o \
@@ -117,6 +116,7 @@ ML_INSTALLER_OBJS = \
 	mem.o \
 	util.o \
 	cache.o \
+	installer.o \
 
 ML_OBJS-y += $(ML_INSTALLER_OBJS)
 

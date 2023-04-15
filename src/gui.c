@@ -127,7 +127,7 @@ void ml_gui_main_task()
 
         if (!magic_is_off())
         {
-
+            
             if (event->type == 0)
             {
                 if (handle_buttons(event) == 0) { // ML button/event handler
